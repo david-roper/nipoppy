@@ -12,6 +12,9 @@ from nipoppy.config.container import ContainerConfig, prepare_container
 from nipoppy.utils import StrOrPathLike
 from nipoppy.workflows.pipeline import BasePipelineWorkflow
 
+from pprint import pprint
+import json
+import sys
 
 class PipelineRunner(BasePipelineWorkflow):
     """Pipeline runner."""
@@ -118,7 +121,13 @@ class PipelineRunner(BasePipelineWorkflow):
         )
         self.logger.debug(f"Descriptor string: {descriptor_str}")
         self.logger.info("Validating the JSON descriptor")
-        bosh(["validate", descriptor_str])
+        
+        try:
+            bosh(["validate", descriptor_str])
+        except Exception as e:
+            print("This error occured while validating the following data:", file=sys.stderr)
+            pprint(json.loads(descriptor_str), stream=sys.stderr, indent=2)
+            raise e
 
         # process and validate the invocation
         self.logger.info("Processing the JSON invocation")
